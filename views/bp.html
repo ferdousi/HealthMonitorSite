@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
+
+		<script type="text/javascript">
+
+		$(document).ready(function(){
+		  $('#datePicker')
+		      .datepicker({
+		          format: 'mm/dd/yyyy',
+		          todayHighlight: true 
+
+		   
+		    })
+		});
+		</script>
+
+		<style>
+			body {
+				padding-top:20px;
+				background-image: url("/rain-drops"); 
+
+			}
+
+			#output{
+				background-color: #555;
+      			color: white;
+      			font-weight: bold;
+      			font-size: 24;
+      			padding: 12px;
+			}
+
+			#errordate{
+				color: red;
+			}
+			#errorsys{
+				color: red;
+			}
+			#errordia{
+				color: red;
+			}
+
+			.btn{
+
+    background-color: green;
+    border: 2px solid green;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+
+    }
+
+    .btn:hover{
+
+      background-color: darkred;
+      border: 2px solid darkred;
+      color: white;
+
+    }
+
+     #mainwell{
+      background-color: rgba(0, 0, 0, 0.8); 
+      color: white;
+    }
+
+    #bodywell{
+      background-color: rgba(0, 0, 0, 0.8); 
+      color: white;
+    }
+
+    #chartwell{
+      background-color: white;
+    }
+
+  
+
+	</style>
+	</head>
+	<body>
+
+	<nav class="navbar navbar-inverse navbar-static-top">
+	<div class="container"><div class="navbar-header"><a class="navbar-brand">Health Monitor</a></div>
+		<ul class="nav navbar-nav">
+		<li class="active"><a href="/bp">Blood Pressure</a></li>
+		<li><a href="/weighttrack">Weight</a></li>
+		<li><a href="/index">BMI</a></li>
+		</ul>
+
+		<ul class="nav navbar-nav navbar-right">
+		<li><a href="/logout">Logout</a></li>
+		</ul>
+	</div>
+	</nav>
+
+	
+	<div class="container">
+	<div class="well" id="mainwell">
+
+    <h1>Track your health</h1>
+
+    <p>Easy way to keep track of your weight and BMI</p>
+    </div>
+    </div>
+	
+	
+	
+  <div class="container">
+  <div class="well" id="bodywell">
+  <div class="row">
+
+	<div class="col-md-4">
+	      <h2>Track Blood Pressure</h2>
+	      <form action="/bp" method="post" name="bpform" onsubmit="return(validate());">
+		      <div class="form-group">
+			      <label for="date"><h3>Date:</h3></label>
+			      <div class="input-group input-append date" id="datePicker">
+			      <input type="text" name="date" class="form-control input-lg" id="date"/>
+			      <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
+			      </div>
+			      <div id="errordate"></div>
+		      </div>
+
+			    <div class="form-group">
+			      <label for="systolic"><h3>Systolic:</h3></label>
+			      <input type="text" name="systolic" class="form-control input-lg" id="systolic">
+			      <div id="errorsys"></div>
+			    </div>
+			    <div class="form-group">
+			      <label for="diastolic"><h3>Diastolic:</h3></label>
+			      <input type="text" class="form-control" name="diastolic" id="diastolic">
+			      <div id="errordia"></div>
+			    </div>
+		    
+		    <button type="submit" class="btn btn-default">Enter</button>
+		    
+	  	   </form>
+  	</div>
+
+  	<div class="col-md-offset-2 col-md-6">
+      <div class="well" id="chartwell">
+        <h4>Dashboard</h4>
+        <p><canvas id="lineChart" width="400" height="400"></canvas></p>
+      </div>
+    </div>
+
+  	</div>
+  	</div>
+ 
+
+  	<hr>
+	</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.bundle.js">
+</script>
+
+<script type="text/javascript">
+
+//Validate userinput in the form
+
+function validate(){
+	if(document.bpform.date.value === ""){
+		document.getElementById("errordate").innerHTML = "Please insert a date";
+		return false;
+	}
+	if(document.bpform.systolic.value === "" || isNaN(document.bpform.systolic.value) === true){
+		document.getElementById("errorsys").innerHTML = "Please insert systolic value";
+		return false;
+	}
+	if(document.bpform.diastolic.value === "" || isNaN(document.bpform.diastolic.value) === true){
+		document.getElementById("errordia").innerHTML = "Please insert diastolic value ";
+		return false;
+	}
+
+	return true;
+}
+
+$(document).ready(function(){
+    loaddoc();
+});
+
+//Create line chart from chart.js
+function loaddoc(){
+
+	var request = new XMLHttpRequest();
+	request.onreadystatechange = function(){
+      if(request.readyState === 4){
+        if (request.status === 200){
+
+          
+          
+            var obj = JSON.parse(request.responseText);
+            var sarray = [];
+    		var darray = [];
+    		var tarray = [];
+
+    		obj.sort(function(a, b){
+              return new Date(a.infodate) - new Date(b.infodate);
+
+            });
+
+            for(var i=0; i<obj.length; i++){
+
+             	sarray[i] = obj[i].systolic;
+        	 	darray[i] = obj[i].diastolic;
+        	 	tarray[i] = obj[i].infodate;
+       
+       
+
+            }
+
+        const CHART = document.getElementById("lineChart").getContext("2d");
+		console.log(CHART);
+		Chart.defaults.global.responsive = false;
+		let lineChart = new Chart(CHART, {
+		    type: 'line',
+		    data: {
+		    labels: tarray,
+		    datasets: [
+		        {
+		            label: "Systolic",
+		            fill: false,
+		            lineTension: 0.1,
+		            backgroundColor: "green",
+		            borderColor: "green",
+		            borderCapStyle: 'butt',
+		            borderDash: [],
+		            borderDashOffset: 0.0,
+		            borderJoinStyle: 'miter',
+		            pointBorderColor: "black",
+		            pointBackgroundColor: "#fff",
+		            pointBorderWidth: 1,
+		            pointHoverRadius: 5,
+		            pointHoverBackgroundColor: "red",
+		            pointHoverBorderColor: "black",
+		            pointHoverBorderWidth: 2,
+		            pointRadius: 1,
+		            pointHitRadius: 10,
+		            data: sarray,
+		            spanGaps: false,
+		        },
+
+		    
+		        {
+		            label: "Diastolic",
+		            fill: false,
+		            lineTension: 0.1,
+		            backgroundColor: "darkblue",
+		            borderColor: "darkblue",
+		            borderCapStyle: 'butt',
+		            borderDash: [],
+		            borderDashOffset: 0.0,
+		            borderJoinStyle: 'miter',
+		            pointBorderColor: "red",
+		            pointBackgroundColor: "#fff",
+		            pointBorderWidth: 1,
+		            pointHoverRadius: 5,
+		            pointHoverBackgroundColor: "red",
+		            pointHoverBorderColor: "black",
+		            pointHoverBorderWidth: 2,
+		            pointRadius: 1,
+		            pointHitRadius: 10,
+		            data: darray,
+		            spanGaps: false,
+		        }
+		    ]
+		  }
+		});
+	 }
+  }
+};
+
+request.open(
+      'GET',
+      '/dashboard1',
+      true
+    );
+
+    request.send(null);
+  };
+
+ //References
+ /*
+
+ http://www.chartjs.org/docs/#line-chart
+
+ */
+        	
+</script>
+	
+</body>
+</html>

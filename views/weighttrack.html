@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
+ 
+
+  <script type="text/javascript">
+
+  //Format date
+
+  $(document).ready(function(){
+    $('#datePicker')
+      .datepicker({
+          format: 'mm/dd/yyyy'
+   
+    })
+  });
+  </script>
+  
+
+  <style type="text/css">
+
+    body{
+      padding-top:20px;
+      background-image: url("/rain-drops"); 
+    }
+
+    #errordate{
+      color: red;
+    }
+
+    #errorweight{
+      color: red;
+    }
+
+    #mainwell{
+      background-color: rgba(0, 0, 0, 0.8); 
+      color: white;
+    }
+
+    #bodywell{
+      background-color: rgba(0, 0, 0, 0.8); 
+      color: white;
+    }
+
+    #chartwell{
+      background-color: white;
+    }
+
+    .btn{
+
+    background-color: green;
+    border: 2px solid green;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+
+    }
+
+    .btn:hover{
+
+      background-color: darkred;
+      border: 2px solid darkred;
+      color: white;
+
+    }
+
+
+
+  </style>
+  
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-static-top">
+  <div class="container"><div class="navbar-header"><a class="navbar-brand">Health Monitor</a></div>
+    <ul class="nav navbar-nav">
+    <li class="active"><a href="/weighttrack">Weight</a></li>
+    <li><a href="/bp">Blood Pressure</a></li>
+    <li><a href="/index">BMI</a></li>
+    </ul>
+
+    <ul class="nav navbar-nav navbar-right">
+    <li><a href="/logout">Logout</a></li>
+    </ul>
+  </div>
+</nav>
+
+  
+  <div class="container">
+  <div class="well" id="mainwell">
+
+    <h1>Track your weight</h1>
+
+    <p>Monitor and visualize your health goals</p>
+  </div>
+  </div>
+
+<div class="container">
+<div class="well" id="bodywell">
+<div class="row">
+
+      <div class="col-md-4">
+      
+      <form class="form-horizontal" action="/weighttrack" method="post" name="weightform" onsubmit="return(validate());">
+    
+      <div class="form-group">
+    
+        <label for="date"><h3>Date:</h3></label>
+        <div class="input-group input-append date" id="datePicker">
+        <input type="text" name="date" class="form-control input-lg" id="date" placeholder="Select a date from the calender --->" />
+        <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
+        </div>
+        <div id="errordate"></div>
+    
+     </div>
+
+    <div class="form-group">
+    
+      <label for="weight"><h3>Weight (Lbs):</h3></label>
+      <input type="text" class="form-control input-lg" name="weight" id="weight" placeholder="Enter your weight">
+      <div id="errorweight"></div>
+    
+    </div>
+    
+    
+    <div class="form-group">
+      <button type="submit" class="btn btn-default"><b>Enter</b></button>
+    </div>
+   
+    
+    </form>
+
+    </div>
+
+      <div class="col-md-offset-2 col-md-6">
+      <div class="well" id="chartwell">
+        <h4>Dashboard</h4>
+        <p><canvas id="lineChart" width="400" height="400"></canvas></p>
+      </div>
+      </div>
+
+
+      
+  </div>
+  </div>
+
+  <hr>
+  
+
+</div>
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.bundle.js">
+</script>
+
+<script type="text/javascript">
+
+//Validate user input 
+
+function validate(){
+  if(document.weightform.date.value === ""){
+    document.getElementById("errordate").innerHTML = "Please enter date!";
+      return false;
+
+  }
+  if(document.weightform.weight.value === "" || isNaN(document.weightform.weight.value) === true){
+    document.getElementById("errorweight").innerHTML = "Please enter weight!";
+      return false;
+  }
+
+  return true;
+
+};
+
+// Display weight chart when the page is loaded
+
+$(document).ready(function(){
+    loaddoc();
+
+});
+
+    function loaddoc(){
+    var request = new XMLHttpRequest();
+
+    request.onreadystatechange = function(){
+      if(request.readyState === 4){
+        if (request.status === 200){
+
+          
+          
+            var obj = JSON.parse(request.responseText);
+            var warray = [];
+            var tarray = [];
+
+            obj.sort(function(a, b){
+              return new Date(a.infodate) - new Date(b.infodate);
+
+            });
+
+            for(var i=0; i<obj.length; i++){
+
+             warray[i] = obj[i].weight;
+             tarray[i] = obj[i].infodate;
+       
+
+            }
+
+//Create line chart in chartjs
+
+const CHART = document.getElementById("lineChart").getContext("2d");
+console.log(CHART);
+Chart.defaults.global.responsive = false;
+let lineChart = new Chart(CHART, {
+  type: 'line',
+  data: {
+    labels: tarray,
+    datasets: [
+        {
+            label: "My Weight",
+            fill: false,
+            lineTension: 0.1,
+            backgroundColor: "darkred",
+            borderColor: "darkgreen",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "darkred",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "darkred",
+            pointHoverBorderColor: "black",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: warray,
+            spanGaps: false,
+        }
+    ]
+  }
+});
+
+
+        }
+      }
+    };
+
+    request.open(
+      'GET',
+      '/dashboard',
+      true
+    );
+
+    request.send(null);
+  };
+
+  </script>
+
+<script type="text/javascript">
+
+//get weight and height from the url to calculate bmi
+
+var pair = [];
+var values = [];
+var realval = [];
+
+function calc(){
+  var query = window.location.search.substring(1);
+  values = query.split("&");
+  for(var i=0; i<values.length; i++){
+    pair[i] = values[i].split("=");
+
+
+  }
+
+
+  var weight = pair[0][1];
+  var height = pair[1][1];
+  bmi = ((weight*703)/(height*height)).toFixed(2);
+  return bmi;
+
+  
+}
+
+//Function to move the bmi bar
+
+function move() {
+
+  var bmi;
+
+  bmi = calc();
+
+  if(bmi >= 15 && bmi <=35){
+
+
+  var elem = document.getElementById("myBar");
+  var width = 14;
+  var id = setInterval(frame, 50);
+  function frame() {
+    if (width >= bmi) {
+      clearInterval(id);
+    } else {
+      width++;
+      elem.style.width = width/0.5 + '%';
+      document.getElementById("label").innerHTML = width * 1;
+    }
+  }
+  }
+}
+
+//references:
+/*
+http://www.chartjs.org/docs/#line-chart
+
+
+*/
+
+</script>
+</body>
+</html>
+
+

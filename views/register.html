@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+		<style type="text/css">
+			body {
+				padding-top:20px;
+				background-image: url("https://lidiagetsstrongandlean.files.wordpress.com/2013/08/kozzi-apple-with-measuring-tape-on-weight-scale-1774x1183.jpg"); 
+
+			}
+
+			#regsection{
+				margin: auto;
+				display: block;
+				height: 300px;
+    			width: 50%;
+				background-color: rgba(0, 0, 0, 0.2); 
+			}
+			
+			.navbar-inverse{
+				background-color: #990000;
+			}
+
+			.error{
+				color: red;
+			}
+
+		</style>
+	</head>
+	<body>
+
+		<nav class="navbar navbar-inverse navbar-static-top">
+			<div class="container">
+			<div class="navbar-header"><a class="navbar-brand">Health Monitor</a></div>
+			<ul class="nav navbar-nav">
+			<li class="active"><a href="/register">Register</a></li>
+			<li><a href="/">Login</a></li>
+			</ul>
+
+			</div>
+		</nav>
+		<br>
+
+	
+	
+	<div class="container">
+	<section id="regsection">
+    
+    <div class="col-sm-offset-2"><h1>Register</h1></div>
+		
+		<form class="form-horizontal" action="/register" method="post" onsubmit="return validate();">
+		<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-8">
+		<label for="username">Username:</label>
+		<input class="form-control" type="text" name="username" id="username">
+		<div class="error" id="usererror"></div>
+		</div>
+		</div>
+
+		<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-8">
+		<label for="password">Password:</label>
+		<input class="form-control" type="password" name="password" id="password">
+		<div class="error" id="pwderror"></div>
+		</div>
+		</div>
+
+		
+  		
+		<div class="form-group">
+		
+		<div class="col-sm-offset-2 col-sm-8">
+
+		<button type="submit" class="btn btn-primary">Register</button>
+		</div>
+		</div>
+
+		</form>
+			
+    </section>		
+	</div>
+
+	<script type="text/javascript">
+
+	//Validates user input
+	function validate(){
+		var username = document.getElementById("username").value;
+		var password = document.getElementById("password").value;
+
+		if(username === ""){
+			document.getElementById("usererror").innerHTML = "Please create a username";
+			return false;
+		}
+		if(password === ""){
+			document.getElementById("pwderror").innerHTML = "Please create a password";
+			return false;
+		}
+
+		return true;
+	};
+
+
+
+	</script>
+    
+		
+		
+	</body>
+</html>
